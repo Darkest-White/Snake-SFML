@@ -196,6 +196,7 @@ int main()
 			}
 		}
 
+
 		if (Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))
 		{
 			snake.dir = 1;
@@ -213,9 +214,10 @@ int main()
 			snake.dir = 4;
 		}
 
-		snake.update();
 
 		win.clear(Color::Black);
+
+		snake.update();
 
 		snake.draw(win);
 
