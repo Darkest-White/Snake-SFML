@@ -113,6 +113,7 @@ private:
 	Point position;
 	Vector2f size;
 	int speed;
+	int score;
 
 public:
 
@@ -125,67 +126,135 @@ public:
 		position.y = win_height / 2;
 		position.y -= position.y % 20;
 
+		shape.setPosition(position.x, position.y);
+
 		size.x = 20;
 		size.y = 20;
 
-		shape.setPosition(position.x, position.y);
 		shape.setOrigin(size.x / 2, size.y / 2);
 		shape.setSize(size);
 		shape.setFillColor(Color::Red);
 
 		speed = size.x;
 		dir = 0;
+
+		score = 0;
 	}
 
+
+	Vector2f get_position()
+	{
+		return shape.getPosition();
+	}
+
+	void score_up()
+	{
+		score++;
+	}
+
+	int get_score()
+	{
+		return score;
+	}
 
 	void draw(RenderWindow& win)
 	{
 		win.draw(shape);
 	}
 
-	void update()
+	void move()
 	{
 		switch (dir)
 		{
 		case 0:
-		{
 			break;
-		}
 		case 1:
-		{
 			position.y -= speed;
 			shape.setPosition(position.x, position.y);
 			break;
-		}
 		case 2:
-		{
 			position.y += speed;
 			shape.setPosition(position.x, position.y);
 			break;
-		}
 		case 3:
-		{
 			position.x -= speed;
 			shape.setPosition(position.x, position.y);
 			break;
-		}
 		case 4:
-		{
 			position.x += speed;
 			shape.setPosition(position.x, position.y);
 			break;
 		}
-		}
+
+		if (position.x < 0)
+			position.x = win_width;
+		if (position.x > win_width)
+			position.x = 0;
+		if (position.y < 0)
+			position.y = win_height;
+		if (position.y > win_height)
+			position.y = 0;
+	}
+};
+
+class Food
+{
+private:
+
+	RectangleShape shape;
+	Point position;
+	Vector2f size;
+
+public:
+
+	Food()
+	{
+		position.x = rand() % win_width;
+		position.x -= position.x % 20;
+		position.y = rand() % win_height;
+		position.y -= position.y % 20;
+
+		shape.setPosition(position.x, position.y);
+
+		size.x = 20;
+		size.y = 20;
+
+		shape.setOrigin(size.x / 2, size.y / 2);
+		shape.setSize(size);
+		shape.setFillColor(Color::Green);
+	}
+
+	Vector2f get_position()
+	{
+		return shape.getPosition();
+	}
+
+	void respawn()
+	{
+		position.x = rand() % win_width;
+		position.x -= position.x % 20;
+		position.y = rand() % win_height;
+		position.y -= position.y % 20;
+
+		shape.setPosition(position.x, position.y);
+	}
+
+	void draw(RenderWindow& win)
+	{
+		win.draw(shape);
 	}
 };
 
 
 int main()
 {
+	srand(time(0));
+
 	RenderWindow win(VideoMode(win_width, win_height), win_name);
 	win.setFramerateLimit(frame_limit);
 
 	Snake snake;
+	Food food;
 
 	while (win.isOpen())
 	{
@@ -215,13 +284,21 @@ int main()
 			snake.dir = 4;
 		}
 
+		if (snake.get_position() == food.get_position())
+		{
+			food.respawn();
+			snake.score_up();
+		}
+
 
 		win.clear(Color::Black);
 
-		snake.update();
+		snake.move();
 
 		snake.draw(win);
+		food.draw(win);
 
 		win.display();
 	}
+	cout << "Your score is " << snake.get_score() << endl;
 }
