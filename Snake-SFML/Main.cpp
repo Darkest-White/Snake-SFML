@@ -129,6 +129,7 @@ public:
 		size.y = 20;
 
 		shape.setPosition(position.x, position.y);
+		shape.setOrigin(size.x / 2, size.y / 2);
 		shape.setSize(size);
 		shape.setFillColor(Color::Red);
 
