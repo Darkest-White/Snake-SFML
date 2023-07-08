@@ -4,38 +4,6 @@ using namespace std;
 using namespace sf;
 
 
-//class Snake
-//{
-//private:
-//
-//	RectangleShape shape;
-//	Vector2i position;
-//	Vector2f size;
-//
-//public:
-//
-//	Snake()
-//	{
-//		position.x = 100;
-//		position.y = 100;
-//
-//		shape.setPosition(position.x, position.y);
-//
-//		size.x = 20;
-//		size.y = 20;
-//
-//		shape.setSize(size);
-//		shape.setOrigin(size.x / 2, size.y / 2);
-//
-//		shape.setFillColor(Color::Red);
-//	}
-//
-//	void draw(RenderWindow win)
-//	{
-//		win.draw(shape);
-//	}
-//};
-
 //class Core
 //{
 //private:
