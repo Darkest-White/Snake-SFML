@@ -76,6 +76,7 @@ private:
 	int speed;
 	int dir;
 	int score;
+	bool is_alive;
 
 public:
 
@@ -104,6 +105,8 @@ public:
 		dir = 0;
 
 		score = 0;
+
+		is_alive = true;
 	}
 
 
@@ -168,6 +171,11 @@ public:
 			break;
 		}
 
+		check_position();
+	}
+
+	void check_position()
+	{
 		if (segments[0].getPosition().x < 0)
 		{
 			segments[0].setPosition(win_width, segments[0].getPosition().y);
@@ -183,6 +191,14 @@ public:
 		if (segments[0].getPosition().y > win_height)
 		{
 			segments[0].setPosition(segments[0].getPosition().x, 0);
+		}
+
+		for (int i = 1; i < segments.size(); i++)
+		{
+			if (segments[0].getPosition() == segments[i].getPosition())
+			{
+				is_alive = false;
+			}
 		}
 	}
 
@@ -216,6 +232,11 @@ public:
 
 		segments.push_back(tail);
 	}
+
+	bool get_alive()
+	{
+		return is_alive;
+	}
 };
 
 class Food
@@ -242,6 +263,7 @@ public:
 
 		shape.setFillColor(Color::Green);
 	}
+
 
 	Vector2f get_position()
 	{
@@ -307,7 +329,7 @@ int main()
 			snake.set_dir(0);
 		}
 
-		// foodCollision
+		// FoodCollision
 		if (snake.get_position() == food.get_position())
 		{
 			do
@@ -316,6 +338,12 @@ int main()
 			} while (snake.get_position() == food.get_position());
 
 			snake.grow();
+		}
+
+		// CheckDeath
+		if (!snake.get_alive())
+		{
+			win.close();
 		}
 
 		// Screen
