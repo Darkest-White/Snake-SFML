@@ -67,57 +67,54 @@ int frame_limit = 10;
 Event ev;
 
 
-struct Point
-{
-	int x, y;
-};
-
-
 class Snake
 {
 private:
 
-	RectangleShape shape;
-	Point position;
-	Vector2f size;
+	vector<RectangleShape> segments;
+	Vector2f last_position;
 	int speed;
+	int dir;
 	int score;
 
 public:
 
-	int dir;
-
 	Snake()
 	{
-		position.x = win_width / 2;
-		position.x -= position.x % 20;
-		position.y = win_height / 2;
-		position.y -= position.y % 20;
+		int x = win_width / 2;
+		x -= x % 20;
+		int y = win_height / 2;
+		y -= y % 20;
 
-		shape.setPosition(position.x, position.y);
+		RectangleShape head;
+		head.setPosition(x, y);
+		segments.push_back(head);
 
-		size.x = 20;
-		size.y = 20;
+		Vector2f parameters(20, 20);
+		segments[0].setSize(parameters);
 
-		shape.setOrigin(size.x / 2, size.y / 2);
-		shape.setSize(size);
-		shape.setFillColor(Color::Red);
+		segments[0].setOrigin(parameters.x / 2, parameters.y / 2);
 
-		speed = size.x;
+		segments[0].setFillColor(Color::Red);
+
+		last_position = segments[0].getPosition();
+
+		speed = parameters.x;
+
 		dir = 0;
 
 		score = 0;
 	}
 
 
-	Vector2f get_position()
+	void set_dir(int a)
 	{
-		return shape.getPosition();
+		dir = a;
 	}
 
-	void score_up()
+	Vector2f get_position()
 	{
-		score++;
+		return segments[0].getPosition();
 	}
 
 	int get_score()
@@ -127,41 +124,97 @@ public:
 
 	void draw(RenderWindow& win)
 	{
-		win.draw(shape);
+		for (int i = 0; i < segments.size(); i++)
+		{
+			win.draw(segments[i]);
+		}
 	}
 
 	void move()
 	{
+		last_position = segments[segments.size() - 1].getPosition();
+
 		switch (dir)
 		{
 		case 0:
 			break;
 		case 1:
-			position.y -= speed;
-			shape.setPosition(position.x, position.y);
+			for (int i = segments.size() - 1; i > 0; i--)
+			{
+				segments[i].setPosition(segments[i - 1].getPosition());
+			}
+			segments[0].move(0, -speed);
 			break;
 		case 2:
-			position.y += speed;
-			shape.setPosition(position.x, position.y);
+			for (int i = segments.size() - 1; i > 0; i--)
+			{
+				segments[i].setPosition(segments[i - 1].getPosition());
+			}
+			segments[0].move(0, speed);
 			break;
 		case 3:
-			position.x -= speed;
-			shape.setPosition(position.x, position.y);
+			for (int i = segments.size() - 1; i > 0; i--)
+			{
+				segments[i].setPosition(segments[i - 1].getPosition());
+			}
+			segments[0].move(-speed, 0);
 			break;
 		case 4:
-			position.x += speed;
-			shape.setPosition(position.x, position.y);
+			for (int i = segments.size() - 1; i > 0; i--)
+			{
+				segments[i].setPosition(segments[i - 1].getPosition());
+			}
+			segments[0].move(speed, 0);
 			break;
 		}
 
-		if (position.x < 0)
-			position.x = win_width;
-		if (position.x > win_width)
-			position.x = 0;
-		if (position.y < 0)
-			position.y = win_height;
-		if (position.y > win_height)
-			position.y = 0;
+		if (segments[0].getPosition().x < 0)
+		{
+			segments[0].setPosition(win_width, segments[0].getPosition().y);
+		}
+		if (segments[0].getPosition().x > win_width)
+		{
+			segments[0].setPosition(0, segments[0].getPosition().y);
+		}
+		if (segments[0].getPosition().y < 0)
+		{
+			segments[0].setPosition(segments[0].getPosition().x, win_width);
+		}
+		if (segments[0].getPosition().y > win_height)
+		{
+			segments[0].setPosition(segments[0].getPosition().x, 0);
+		}
+	}
+
+	void grow()
+	{
+		Vector2f new_segment = segments[segments.size() - 1].getPosition();
+		RectangleShape tail;
+
+		if (segments[segments.size() - 1].getPosition().x < last_position.x)
+		{
+			tail.setPosition(new_segment.x + speed, new_segment.y);
+		}
+		if (segments[segments.size() - 1].getPosition().x > last_position.x)
+		{
+			tail.setPosition(new_segment.x - speed, new_segment.y);
+		}
+		if (segments[segments.size() - 1].getPosition().y < last_position.y)
+		{
+			tail.setPosition(new_segment.x, new_segment.y + speed);
+		}
+		if (segments[segments.size() - 1].getPosition().y > last_position.y)
+		{
+			tail.setPosition(new_segment.x, new_segment.y - speed);
+		}
+
+		tail.setSize(segments[0].getSize());
+		tail.setOrigin(segments[0].getOrigin());
+		tail.setFillColor(segments[0].getFillColor());
+
+		score++;
+
+		segments.push_back(tail);
 	}
 };
 
@@ -170,25 +223,23 @@ class Food
 private:
 
 	RectangleShape shape;
-	Point position;
-	Vector2f size;
 
 public:
 
 	Food()
 	{
-		position.x = rand() % win_width;
-		position.x -= position.x % 20;
-		position.y = rand() % win_height;
-		position.y -= position.y % 20;
+		int x = rand() % win_width;
+		x -= x % 20;
+		int y = rand() % win_height;
+		y -= y % 20;
 
-		shape.setPosition(position.x, position.y);
+		shape.setPosition(x, y);
 
-		size.x = 20;
-		size.y = 20;
+		Vector2f parameters(20, 20);
+		shape.setSize(parameters);
 
-		shape.setOrigin(size.x / 2, size.y / 2);
-		shape.setSize(size);
+		shape.setOrigin(parameters.x / 2, parameters.y / 2);
+
 		shape.setFillColor(Color::Green);
 	}
 
@@ -199,12 +250,12 @@ public:
 
 	void respawn()
 	{
-		position.x = rand() % win_width;
-		position.x -= position.x % 20;
-		position.y = rand() % win_height;
-		position.y -= position.y % 20;
+		int x = rand() % win_width;
+		x -= x % 20;
+		int y = rand() % win_height;
+		y -= y % 20;
 
-		shape.setPosition(position.x, position.y);
+		shape.setPosition(x, y);
 	}
 
 	void draw(RenderWindow& win)
@@ -234,31 +285,40 @@ int main()
 			}
 		}
 
-
+		// Direction
 		if (Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))
 		{
-			snake.dir = 1;
+			snake.set_dir(1);
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
 		{
-			snake.dir = 2;
+			snake.set_dir(2);
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left) || Keyboard::isKeyPressed(Keyboard::A))
 		{
-			snake.dir = 3;
+			snake.set_dir(3);
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Right) || Keyboard::isKeyPressed(sf::Keyboard::D))
 		{
-			snake.dir = 4;
+			snake.set_dir(4);
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Space))
+		{
+			snake.set_dir(0);
 		}
 
+		// foodCollision
 		if (snake.get_position() == food.get_position())
 		{
-			food.respawn();
-			snake.score_up();
+			do
+			{
+				food.respawn();
+			} while (snake.get_position() == food.get_position());
+
+			snake.grow();
 		}
 
-
+		// Screen
 		win.clear(Color::Black);
 
 		snake.move();
