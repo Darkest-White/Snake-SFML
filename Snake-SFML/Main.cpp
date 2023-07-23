@@ -278,9 +278,9 @@ public:
 	void respawn()
 	{
 		int x = rand() % win_width;
-		x -= x % 20;
+		x -= x % GLOBAL_PARAMETER;
 		int y = rand() % win_height;
-		y -= y % 20;
+		y -= y % GLOBAL_PARAMETER;
 
 		shape.setPosition(x, y);
 	}
@@ -368,6 +368,7 @@ int main()
 		{
 			snake.set_dir(0);
 		}
+
 
 		// FoodCollision
 		if (snake.get_position() == food.get_position())
