@@ -66,6 +66,8 @@ string win_name = "Snake";
 int frame_limit = 10;
 Event ev;
 
+const int GLOBAL_PARAMETER = 20;
+
 
 class Snake
 {
@@ -83,24 +85,22 @@ public:
 	Snake()
 	{
 		int x = win_width / 2;
-		x -= x % 20;
+		x -= x % GLOBAL_PARAMETER;
 		int y = win_height / 2;
-		y -= y % 20;
+		y -= y % GLOBAL_PARAMETER;
 
 		RectangleShape head;
 		head.setPosition(x, y);
+
+		Vector2f parameters(GLOBAL_PARAMETER, GLOBAL_PARAMETER);
+		head.setSize(parameters);
+		head.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
+		head.setFillColor(Color::Red);
 		segments.push_back(head);
-
-		Vector2f parameters(20, 20);
-		segments[0].setSize(parameters);
-
-		segments[0].setOrigin(parameters.x / 2, parameters.y / 2);
-
-		segments[0].setFillColor(Color::Red);
 
 		last_position = segments[0].getPosition();
 
-		speed = parameters.x;
+		speed = GLOBAL_PARAMETER;
 
 		dir = 0;
 
@@ -176,6 +176,7 @@ public:
 
 	void check_position()
 	{
+		// CheckBorders
 		if (segments[0].getPosition().x < 0)
 		{
 			segments[0].setPosition(win_width, segments[0].getPosition().y);
@@ -193,6 +194,7 @@ public:
 			segments[0].setPosition(segments[0].getPosition().x, 0);
 		}
 
+		// CheckCollisionWithBody
 		for (int i = 1; i < segments.size(); i++)
 		{
 			if (segments[0].getPosition() == segments[i].getPosition())
@@ -237,6 +239,11 @@ public:
 	{
 		return is_alive;
 	}
+
+	void kill()
+	{
+		is_alive = false;
+	}
 };
 
 class Food
@@ -250,17 +257,15 @@ public:
 	Food()
 	{
 		int x = rand() % win_width;
-		x -= x % 20;
+		x -= x % GLOBAL_PARAMETER;
 		int y = rand() % win_height;
-		y -= y % 20;
+		y -= y % GLOBAL_PARAMETER;
 
 		shape.setPosition(x, y);
 
-		Vector2f parameters(20, 20);
+		Vector2f parameters(GLOBAL_PARAMETER, GLOBAL_PARAMETER);
 		shape.setSize(parameters);
-
-		shape.setOrigin(parameters.x / 2, parameters.y / 2);
-
+		shape.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
 		shape.setFillColor(Color::Green);
 	}
 
@@ -286,6 +291,40 @@ public:
 	}
 };
 
+class Block
+{
+private:
+
+	RectangleShape shape;
+
+public:
+
+	Block()
+	{
+		int x = rand() % win_width;
+		x -= x % GLOBAL_PARAMETER;
+		int y = rand() % win_height;
+		y -= y % GLOBAL_PARAMETER;
+
+		shape.setPosition(x, y);
+
+		Vector2f parameters(GLOBAL_PARAMETER, GLOBAL_PARAMETER);
+		shape.setSize(parameters);
+		shape.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
+		shape.setFillColor(Color::Blue);
+	}
+
+	Vector2f get_position()
+	{
+		return shape.getPosition();
+	}
+
+	void draw(RenderWindow& win)
+	{
+		win.draw(shape);
+	}
+};
+
 
 int main()
 {
@@ -296,6 +335,7 @@ int main()
 
 	Snake snake;
 	Food food;
+	vector<Block> blocks(4);
 
 	while (win.isOpen())
 	{
@@ -340,6 +380,16 @@ int main()
 			snake.grow();
 		}
 
+		// BlockCollision
+		for (int i = 0; i < blocks.size(); i++)
+		{
+			if (snake.get_position() == blocks[i].get_position())
+			{
+				snake.kill();
+			}
+		}
+		
+
 		// CheckDeath
 		if (!snake.get_alive())
 		{
@@ -353,6 +403,10 @@ int main()
 
 		snake.draw(win);
 		food.draw(win);
+		for (int i = 0; i < blocks.size(); i++)
+		{
+			blocks[i].draw(win);
+		}
 
 		win.display();
 	}
