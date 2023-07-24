@@ -110,9 +110,15 @@ public:
 	}
 
 
-	void set_dir(int a)
+	void set_dir(int direction)
 	{
-		dir = a;
+		if (direction < 0 || direction > 4)
+		{
+			cout << "Error when working with the direction" << endl;
+			return;
+		}
+
+		dir = direction;
 	}
 
 	Vector2f get_position()
@@ -235,6 +241,11 @@ public:
 		segments.push_back(tail);
 	}
 
+	void bonus_eat()
+	{
+		score += 10;
+	}
+
 	bool get_alive()
 	{
 		return is_alive;
@@ -291,6 +302,59 @@ public:
 	}
 };
 
+class Bonus
+{
+private:
+
+	RectangleShape shape;
+	int bonus_count;
+
+public:
+
+	Bonus()
+	{
+		bonus_count = 0;
+	}
+
+
+	void check()
+	{
+		bonus_count++;
+
+		if (bonus_count >= 2)
+		{
+			int x = rand() % win_width;
+			x -= x % GLOBAL_PARAMETER;
+			int y = rand() % win_height;
+			y -= y % GLOBAL_PARAMETER;
+
+			shape.setPosition(x, y);
+
+			Vector2f parameters(GLOBAL_PARAMETER, GLOBAL_PARAMETER);
+			shape.setSize(parameters);
+			shape.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
+			shape.setFillColor(Color::Magenta);
+		}
+	}
+
+	void clear()
+	{
+		shape.setPosition(-GLOBAL_PARAMETER, -GLOBAL_PARAMETER);
+
+		bonus_count = 0;
+	}
+
+	Vector2f get_position()
+	{
+		return shape.getPosition();
+	}
+
+	void draw(RenderWindow& win)
+	{
+		win.draw(shape);
+	}
+};
+
 class Block
 {
 private:
@@ -335,6 +399,7 @@ int main()
 
 	Snake snake;
 	Food food;
+	Bonus bonus;
 	vector<Block> blocks(4);
 
 	while (win.isOpen())
@@ -369,6 +434,7 @@ int main()
 			snake.set_dir(0);
 		}
 
+		snake.move();
 
 		// FoodCollision
 		if (snake.get_position() == food.get_position())
@@ -379,6 +445,15 @@ int main()
 			} while (snake.get_position() == food.get_position());
 
 			snake.grow();
+			bonus.check();
+		}
+
+		// BonusCollision
+		if (snake.get_position() == bonus.get_position())
+		{
+			bonus.clear();
+
+			snake.bonus_eat();
 		}
 
 		// BlockCollision
@@ -389,7 +464,6 @@ int main()
 				snake.kill();
 			}
 		}
-		
 
 		// CheckDeath
 		if (!snake.get_alive())
@@ -400,10 +474,9 @@ int main()
 		// Screen
 		win.clear(Color::Black);
 
-		snake.move();
-
 		snake.draw(win);
 		food.draw(win);
+		bonus.draw(win);
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			blocks[i].draw(win);
