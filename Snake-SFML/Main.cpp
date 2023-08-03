@@ -68,6 +68,24 @@ Event ev;
 
 const int GLOBAL_PARAMETER = 20;
 
+class Entity
+{
+protected:
+
+	RectangleShape shape;
+
+public:
+
+	Vector2f get_position()
+	{
+		return shape.getPosition();
+	}
+
+	void draw(RenderWindow& win)
+	{
+		win.draw(shape);
+	}
+};
 
 class Snake
 {
@@ -257,12 +275,8 @@ public:
 	}
 };
 
-class Food
+class Food : public Entity
 {
-private:
-
-	RectangleShape shape;
-
 public:
 
 	Food()
@@ -281,11 +295,6 @@ public:
 	}
 
 
-	Vector2f get_position()
-	{
-		return shape.getPosition();
-	}
-
 	void respawn()
 	{
 		int x = rand() % win_width;
@@ -295,18 +304,12 @@ public:
 
 		shape.setPosition(x, y);
 	}
-
-	void draw(RenderWindow& win)
-	{
-		win.draw(shape);
-	}
 };
 
-class Bonus
+class Bonus : public Entity
 {
 private:
 
-	RectangleShape shape;
 	int bonus_count;
 
 public:
@@ -321,7 +324,7 @@ public:
 	{
 		bonus_count++;
 
-		if (bonus_count >= 2)
+		if (bonus_count >= 10)
 		{
 			int x = rand() % win_width;
 			x -= x % GLOBAL_PARAMETER;
@@ -334,6 +337,8 @@ public:
 			shape.setSize(parameters);
 			shape.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
 			shape.setFillColor(Color::Magenta);
+
+			bonus_count = 0;
 		}
 	}
 
@@ -343,24 +348,10 @@ public:
 
 		bonus_count = 0;
 	}
-
-	Vector2f get_position()
-	{
-		return shape.getPosition();
-	}
-
-	void draw(RenderWindow& win)
-	{
-		win.draw(shape);
-	}
 };
 
-class Block
+class Block : public Entity
 {
-private:
-
-	RectangleShape shape;
-
 public:
 
 	Block()
@@ -376,16 +367,6 @@ public:
 		shape.setSize(parameters);
 		shape.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
 		shape.setFillColor(Color::Blue);
-	}
-
-	Vector2f get_position()
-	{
-		return shape.getPosition();
-	}
-
-	void draw(RenderWindow& win)
-	{
-		win.draw(shape);
 	}
 };
 
@@ -452,7 +433,6 @@ int main()
 		if (snake.get_position() == bonus.get_position())
 		{
 			bonus.clear();
-
 			snake.bonus_eat();
 		}
 
