@@ -60,8 +60,8 @@ using namespace sf;
 //};
 
 
-int win_width = 640;
-int win_height = 480;
+int win_width = 1280;
+int win_height = 720;
 string win_name = "Snake";
 int frame_limit = 10;
 Event ev;
@@ -85,6 +85,7 @@ public:
 	{
 		win.draw(shape);
 	}
+
 };
 
 class Snake
@@ -211,7 +212,7 @@ public:
 		}
 		if (segments[0].getPosition().y < 0)
 		{
-			segments[0].setPosition(segments[0].getPosition().x, win_width);
+			segments[0].setPosition(segments[0].getPosition().x, win_height);
 		}
 		if (segments[0].getPosition().y > win_height)
 		{
@@ -279,7 +280,7 @@ class Food : public Entity
 {
 public:
 
-	Food()
+	Food() 
 	{
 		int x = rand() % win_width;
 		x -= x % GLOBAL_PARAMETER;
@@ -304,6 +305,7 @@ public:
 
 		shape.setPosition(x, y);
 	}
+
 };
 
 class Bonus : public Entity
@@ -368,6 +370,7 @@ public:
 		shape.setOrigin(GLOBAL_PARAMETER / 2, GLOBAL_PARAMETER / 2);
 		shape.setFillColor(Color::Blue);
 	}
+
 };
 
 
